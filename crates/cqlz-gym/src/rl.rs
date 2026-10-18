@@ -208,6 +208,18 @@ pub struct TrainOptions {
     pub entropy: f32,
 }
 
+/// Cost of one greedy-argmax rollout of the policy.
+pub fn argmax_cost(
+    net: &PolicyNet,
+    p: &Problem,
+    scale: f64,
+    rng: &mut impl Rng,
+    device: &Device,
+) -> f64 {
+    let (sets, _) = rollouts(net, p, scale, 1, false, rng, device);
+    p.cost(&sets[0]).unwrap_or(f64::INFINITY)
+}
+
 /// Greedy-argmax and best-of-`k` sampled costs of a trained policy on one problem.
 pub fn solve_with_policy(
     net: &PolicyNet,

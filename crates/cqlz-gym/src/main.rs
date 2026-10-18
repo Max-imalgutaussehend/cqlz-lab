@@ -188,15 +188,31 @@ fn eval(policy: &str, n: usize, exact_s: u64, seed: u64) -> Result<()> {
                 queries: (25, 50),
             },
         ),
+        (
+            "xlarge (80-150 queries)",
+            Size {
+                entities: (6, 8),
+                queries: (80, 150),
+            },
+        ),
     ];
     println!(
-        "{:<24} {:>8} {:>8} {:>8} {:>9} {:>9} {:>8} {:>8}",
-        "size", "naive", "greedy", "exact", "learn-am", "learn-b32", "exact-ok", "t_ex(s)"
+        "{:<24} {:>8} {:>8} {:>8} {:>9} {:>9} {:>8} {:>8} {:>8} {:>8}",
+        "size",
+        "naive",
+        "greedy",
+        "exact",
+        "learn-am",
+        "learn-b32",
+        "exact-ok",
+        "t_ex(s)",
+        "t_am(s)",
+        "t_b32(s)"
     );
     for (label, size) in sizes {
         let mut rng = StdRng::seed_from_u64(seed);
         let mut sums = [0.0f64; 5];
-        let (mut ok, mut t_ex, mut count) = (0, 0.0, 0);
+        let (mut ok, mut t_ex, mut t_am, mut t_nn, mut count) = (0, 0.0, 0.0, 0.0, 0);
         while count < n {
             let w = synth::workload(&mut rng, size);
             let p = Problem::build(w, CostModel::default(), 256);
@@ -208,7 +224,12 @@ fn eval(policy: &str, n: usize, exact_s: u64, seed: u64) -> Result<()> {
             let t = Instant::now();
             let ex = exact(&p, Duration::from_secs(exact_s));
             t_ex += t.elapsed().as_secs_f64();
+            let t = Instant::now();
+            let _ = rl::argmax_cost(&net, &p, gr.cost, &mut rng, &device);
+            t_am += t.elapsed().as_secs_f64();
+            let t = Instant::now();
             let (am, bk) = rl::solve_with_policy(&net, &p, gr.cost, 32, &mut rng, &device);
+            t_nn += t.elapsed().as_secs_f64();
             let best = [nv.cost, gr.cost, ex.cost, am, bk]
                 .into_iter()
                 .fold(f64::INFINITY, f64::min);
@@ -220,7 +241,7 @@ fn eval(policy: &str, n: usize, exact_s: u64, seed: u64) -> Result<()> {
         }
         let m = |i: usize| sums[i] / n as f64;
         println!(
-            "{label:<24} {:>8.3} {:>8.3} {:>8.3} {:>9.3} {:>9.3} {:>5}/{:<2} {:>8.2}",
+            "{label:<24} {:>8.3} {:>8.3} {:>8.3} {:>9.3} {:>9.3} {:>5}/{:<2} {:>8.2} {:>8.2} {:>8.2}",
             m(0),
             m(1),
             m(2),
@@ -228,7 +249,9 @@ fn eval(policy: &str, n: usize, exact_s: u64, seed: u64) -> Result<()> {
             m(4),
             ok,
             n,
-            t_ex / n as f64
+            t_ex / n as f64,
+            t_am / n as f64,
+            t_nn / n as f64
         );
     }
     println!(
