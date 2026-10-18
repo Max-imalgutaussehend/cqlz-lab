@@ -13,6 +13,9 @@ pub struct Attr {
     /// Part of the entity's primary key (needed for row uniqueness in every table).
     #[serde(default)]
     pub key: bool,
+    /// Number of distinct values (used by `validate` to generate data). Default: all rows for keys, `sqrt(rows)` otherwise.
+    #[serde(default)]
+    pub cardinality: Option<f64>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

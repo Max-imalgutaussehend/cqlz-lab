@@ -4,11 +4,18 @@ use crate::workload::{Entity, Query, Workload};
 use cqlc_core::{Input, compile};
 use std::collections::{BTreeSet, HashMap};
 
-/// Cost model constants. **Synthetic**: units are arbitrary "cost per second".
+/// Cost model constants; the unit is "one point read" per second of traffic.
+///
+/// [`CostModel::default`] is **calibrated on measurements**: on ScyllaDB (Apple M3, Docker, the `cql-hpc-bench`
+/// dataset of the `cql-ai` repository) a partition read that returns `n` rows of `w` bytes costs about
+/// `1 + n * (0.0047 + w / 65,946)` point reads, fitted on 168 measured reads of 100+ rows. Storage cost stays an
+/// arbitrary weight. [`CostModel::legacy`] is the uncalibrated model of the first alpha.
 #[derive(Clone, Copy, Debug)]
 pub struct CostModel {
     /// Fixed cost of one partition read.
     pub seek: f64,
+    /// Cost of materialising one returned row, independent of its width.
+    pub per_row: f64,
     /// Bytes that cost as much as one seek.
     pub unit: f64,
     /// Storage cost per GB.
@@ -19,6 +26,19 @@ impl Default for CostModel {
     fn default() -> Self {
         Self {
             seek: 1.0,
+            per_row: 0.0047,
+            unit: 65_946.0,
+            storage_per_gb: 50.0,
+        }
+    }
+}
+
+impl CostModel {
+    /// The synthetic model of the first alpha (a seek equals 4 KiB, no per-row cost).
+    pub fn legacy() -> Self {
+        Self {
+            seek: 1.0,
+            per_row: 0.0,
             unit: 4096.0,
             storage_per_gb: 50.0,
         }
@@ -256,8 +276,11 @@ impl Problem {
                 }
                 calls += 1;
                 if serves(e, t, q) {
-                    read[qi][ti] =
-                        Some(q.weight * (cost.seek + q.result_rows * width(e, t) / cost.unit));
+                    read[qi][ti] = Some(
+                        q.weight
+                            * (cost.seek
+                                + q.result_rows * (cost.per_row + width(e, t) / cost.unit)),
+                    );
                 }
             }
         }

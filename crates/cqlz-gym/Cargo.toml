@@ -1,6 +1,6 @@
 [package]
 name = "cqlz-gym"
-description = "Alpha: verifier-in-the-loop RL for Cassandra data modelling; cqlc-core checks every candidate table, a small Burn policy picks the table set"
+description = "Designs Cassandra tables for a query workload: ILP and a small learned policy search, every candidate verified by cqlc-core, validated on a real ScyllaDB"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -26,3 +26,9 @@ rand = { workspace = true }
 clap = { workspace = true }
 toml = "0.9"
 ureq = "3"
+scylla = "1.9"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "sync"] }
+futures = "0.3"
+uuid = "1"
+async-trait = "0.1"
+good_lp = { version = "1", default-features = false, features = ["microlp"] }

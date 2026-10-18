@@ -90,6 +90,7 @@ pub fn workload(rng: &mut impl Rng, size: Size) -> Workload {
                     ty: ty.to_string(),
                     width,
                     key: i == 0,
+                    cardinality: None,
                 }
             })
             .collect();
