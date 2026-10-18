@@ -1,0 +1,21 @@
+[package]
+name = "cqlz-markov"
+description = "Alpha: Markov models for CQL workloads (query-shape session chains) and partition growth (birth-death chains with TTL)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+keywords = ["cql", "cassandra", "markov", "workload", "hpc"]
+categories = ["database", "science", "simulation"]
+readme = "README.md"
+
+[dependencies]
+cqlc-core = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+rand = { workspace = true }
+clap = { workspace = true }

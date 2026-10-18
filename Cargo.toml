@@ -1,0 +1,25 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/Max-imalgutaussehend/cqlz-lab"
+homepage = "https://max-imalgutaussehend.github.io/cqlz/research.html"
+rust-version = "1.95"
+authors = ["Max-imalgutaussehend"]
+
+[workspace.dependencies]
+cqlc-core = "1.0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+rand = "0.9"
+clap = { version = "4", features = ["derive"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
