@@ -8,7 +8,7 @@ repository.workspace = true
 homepage.workspace = true
 rust-version.workspace = true
 authors.workspace = true
-keywords = ["cql", "cassandra", "reinforcement-learning", "schema", "hpc"]
+keywords = ["cql", "cassandra", "rl", "schema", "hpc"]
 categories = ["database", "science", "development-tools"]
 readme = "README.md"
 
