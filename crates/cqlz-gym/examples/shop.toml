@@ -1,0 +1,50 @@
+# A small online-shop workload. Costs are synthetic; see the README.
+[[entity]]
+name = "orders"
+rows = 5e7
+writes_per_s = 200
+attrs = [
+  { name = "order_id", ty = "uuid", width = 16, key = true },
+  { name = "customer_id", ty = "uuid", width = 16 },
+  { name = "placed_at", ty = "timestamp", width = 8 },
+  { name = "status", ty = "text", width = 12 },
+  { name = "total", ty = "double", width = 8 },
+  { name = "shipping_city", ty = "text", width = 24 },
+  { name = "notes", ty = "text", width = 400 },
+]
+
+[[query]]
+name = "OrderById"
+entity = "orders"
+select = ["customer_id", "placed_at", "status", "total", "shipping_city", "notes"]
+eq = ["order_id"]
+weight = 800
+result_rows = 1
+
+[[query]]
+name = "OrdersOfCustomer"
+entity = "orders"
+select = ["order_id", "placed_at", "status", "total"]
+eq = ["customer_id"]
+range = "placed_at"
+order = "placed_at"
+weight = 300
+result_rows = 20
+
+[[query]]
+name = "RecentByStatus"
+entity = "orders"
+select = ["order_id", "customer_id", "placed_at"]
+eq = ["status"]
+range = "placed_at"
+order = "placed_at"
+weight = 5
+result_rows = 200
+
+[[query]]
+name = "OrdersOfCustomerSummary"
+entity = "orders"
+select = ["order_id", "total"]
+eq = ["customer_id"]
+weight = 40
+result_rows = 50

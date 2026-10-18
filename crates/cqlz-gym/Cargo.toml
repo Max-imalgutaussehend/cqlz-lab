@@ -1,0 +1,28 @@
+[package]
+name = "cqlz-gym"
+description = "Alpha: verifier-in-the-loop RL for Cassandra data modelling; cqlc-core checks every candidate table, a small Burn policy picks the table set"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+keywords = ["cql", "cassandra", "reinforcement-learning", "schema", "hpc"]
+categories = ["database", "science", "development-tools"]
+readme = "README.md"
+
+[features]
+# GPU training through burn's wgpu backend.
+wgpu = ["burn/wgpu"]
+
+[dependencies]
+cqlc-core = { workspace = true }
+burn = { version = "0.22", default-features = false, features = ["std", "flex", "autodiff", "optim", "store", "safetensors"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+rand = { workspace = true }
+clap = { workspace = true }
+toml = "0.9"
+ureq = "3"
